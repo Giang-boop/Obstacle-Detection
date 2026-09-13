@@ -648,7 +648,7 @@ WARNING
 
 &#x20;         ┌────────────────────┐
 
-│ Bounding Box       │
+               │ Bounding Box       │
 
 &#x20;         │ Object + Confidence│
 
