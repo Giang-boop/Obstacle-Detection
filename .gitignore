@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# YOLO model
+*.pt
+*.onnx
+
+# Dataset
+dataset/
+datasets/
+train/
+valid/
+test/
+
+# Videos
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# YOLO outputs
+runs/
+results/
+output/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
