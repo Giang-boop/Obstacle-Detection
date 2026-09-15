@@ -1,4 +1,4 @@
-# Python
+# Python cache
 __pycache__/
 *.py[cod]
 
@@ -7,32 +7,26 @@ venv/
 .venv/
 env/
 
-# YOLO model
-*.pt
-*.onnx
-
-# Dataset
-dataset/
-datasets/
-train/
-valid/
-test/
-
-# Videos
-*.mp4
-*.avi
-*.mov
-*.mkv
-
-# YOLO outputs
-runs/
-results/
-output/
-
 # IDE
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Training results
+runs/
+wandb/
+
+# Dataset
+datasets/
+data/
+train/
+valid/
+test/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
