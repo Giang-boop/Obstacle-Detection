@@ -1,4 +1,4 @@
-# 🚧 Obstacle Detection and Voice Warning System
+# 🚧 Hệ thống hỗ trợ người khiếm thị nhận diện vật cản và cảnh báo bằng giọng nói
 
 ## 1. Giới thiệu
 
@@ -81,7 +81,6 @@ git clone https://github.com/Giang-boop/Obstacle-Detection.git
 cd Obstacle-Detection
 ```
 
-> Nếu repository thuộc tài khoản GitHub khác, thay URL bằng địa chỉ repository tương ứng.
 
 ---
 
@@ -162,8 +161,6 @@ Trong chương trình:
 ```python
 MODEL_PATH = "best.pt"
 ```
-
-> **Lưu ý:** File `best.pt` có thể có kích thước lớn. Nếu vượt giới hạn hoặc không muốn lưu model trực tiếp trên GitHub, có thể lưu model riêng và đặt vào thư mục project trước khi chạy chương trình.
 
 ---
 
