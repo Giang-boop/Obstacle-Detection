@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/pagination.py
+# CHUC NANG: Phan trang dung chung
+# ===================
+
 from flask import current_app, request
 
 from .extensions import db

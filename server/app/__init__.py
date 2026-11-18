@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/__init__.py
+# CHUC NANG: create_app(): dang ky 12 blueprint, CSRF, Flask-Login, trang loi 403/404
+# ===================
+
 import os
 
 from flask import Flask, jsonify, render_template, request

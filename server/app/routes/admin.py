@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/admin.py
+# CHUC NANG: Quan tri: users, blind persons, devices, classes, models, logs
+# ===================
+
 from datetime import datetime, time, timedelta
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for

@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/dashboard.py
+# CHUC NANG: / bang dieu khien: the so lieu, thiet bi, SOS, 10 canh bao moi
+# ===================
+
 from flask import Blueprint, current_app, render_template
 from flask_login import current_user, login_required
 

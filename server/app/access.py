@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/access.py
+# CHUC NANG: Phan quyen admin_required + quyen giam ho nguoi than (403 neu sai)
+# ===================
+
 from functools import wraps
 
 from flask import abort

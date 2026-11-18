@@ -1,4 +1,5 @@
 {% macro csrf_field() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+<!-- MO TA FILE: server/app/templates/_macros.html -- CHUC NANG: Component dung lai: phan trang, badge, nut xoa -->
 
 {% macro level_badge(level) %}
   <span class="badge {{ LEVEL_BADGES.get(level, 'text-bg-secondary') }}">{{ level | level_label }}</span>

@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/run.py
+# CHUC NANG: Diem chay may chu: py -m server.run (--https, --port, --no-warmup), in dia chi LAN
+# ===================
+
 import argparse
 import os
 

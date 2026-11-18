@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/web_detection.py
+# CHUC NANG: May chu tu chay YOLO cho /thiet-bi: DetectionEngine, WebSessionStore theo tung phien
+# ===================
+
 import os
 import sys
 import threading

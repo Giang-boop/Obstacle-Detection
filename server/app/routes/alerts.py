@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/alerts.py
+# CHUC NANG: /alerts lich su canh bao + loc + xuat CSV
+# ===================
+
 import csv
 import io
 from datetime import datetime, time, timedelta

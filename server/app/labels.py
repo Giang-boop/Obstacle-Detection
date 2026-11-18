@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/labels.py
+# CHUC NANG: Nhan tieng Viet cho muc / vi tri / trang thai SOS
+# ===================
+
 LEVEL_LABELS = {"WARNING": "Cảnh báo", "DANGER": "Nguy hiểm"}
 LEVEL_BADGES = {"WARNING": "text-bg-warning", "DANGER": "text-bg-danger"}
 POSITION_LABELS = {"LEFT": "Bên trái", "CENTER": "Phía trước", "RIGHT": "Bên phải"}

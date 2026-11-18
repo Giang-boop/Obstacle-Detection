@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/device_api.py
+# CHUC NANG: REST API thiet bi: hello, config, heartbeat, sessions, alerts, sos, detect (JPEG->YOLO)
+# ===================
+
 import time
 from datetime import timedelta
 from functools import wraps

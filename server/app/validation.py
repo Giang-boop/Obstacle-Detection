@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/validation.py
+# CHUC NANG: Kiem tra email / SDT / ten dang nhap
+# ===================
+
 import re
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")

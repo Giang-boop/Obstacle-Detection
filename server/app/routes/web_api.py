@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/web_api.py
+# CHUC NANG: /api/web/summary cho AJAX dashboard 5 giay
+# ===================
+
 from flask import Blueprint, jsonify, url_for
 from flask_login import current_user, login_required
 

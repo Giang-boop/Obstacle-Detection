@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/statistics.py
+# CHUC NANG: /statistics bieu do 14 ngay / loai vat / muc / vi tri
+# ===================
+
 from datetime import datetime, time, timedelta
 
 from flask import Blueprint, abort, render_template, request

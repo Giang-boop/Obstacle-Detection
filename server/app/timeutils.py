@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/timeutils.py
+# CHUC NANG: Parse gio ISO 8601 va dinh dang hien thi
+# ===================
+
 from datetime import date, datetime
 
 

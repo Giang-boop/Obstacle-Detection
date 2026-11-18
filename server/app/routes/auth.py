@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/auth.py
+# CHUC NANG: /login /logout /profile, doi mat khau, nhat ky dang nhap
+# ===================
+
 from urllib.parse import urlsplit
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for

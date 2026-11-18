@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/services.py
+# CHUC NANG: Nghiep vu chung: payload cau hinh thiet bi, thong ke, touch online
+# ===================
+
 import re
 from datetime import datetime, time, timedelta
 

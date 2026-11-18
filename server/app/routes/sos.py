@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/sos.py
+# CHUC NANG: /sos xu ly tin hieu cuu cuu
+# ===================
+
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 

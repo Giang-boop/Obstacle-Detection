@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/extensions.py
+# CHUC NANG: Khoi tao db / csrf / login_manager
+# ===================
+
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect

@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/seed_data.py
+# CHUC NANG: Du lieu khoi tao: 2 tai khoan, thiet bi DEV-0001, 17 lop, 2 model version
+# ===================
+
 from datetime import datetime
 
 from .extensions import db

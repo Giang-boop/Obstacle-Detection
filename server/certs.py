@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/certs.py
+# CHUC NANG: Sinh chung chi HTTPS tu ky de dien thoai mo camera trong LAN
+# ===================
+
 import datetime
 import ipaddress
 import json

@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/activity.py
+# CHUC NANG: Ghi nhat ky he thong: dang nhap, doi cau hinh, xu ly SOS
+# ===================
+
 from flask import has_request_context, request
 from flask_login import current_user
 

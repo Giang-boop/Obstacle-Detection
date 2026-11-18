@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/sessions.py
+# CHUC NANG: /sessions phien su dung (FPS, do tre, so canh bao)
+# ===================
+
 from flask import Blueprint, abort, render_template, request
 from flask_login import current_user, login_required
 

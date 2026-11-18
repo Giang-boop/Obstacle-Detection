@@ -1,4 +1,5 @@
 {% if current_user.is_authenticated %}{% set layout = "base.html" %}{% else %}{% set layout = "errors/standalone.html" %}{% endif %}
+<!-- MO TA FILE: server/app/templates/errors/error.html -- CHUC NANG: Trang loi 403/404/CSRF -->
 {% extends layout %}
 {% block title %}{{ title }}{% endblock %}
 {% block heading %}Lỗi {{ code }}{% endblock %}

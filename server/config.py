@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/config.py
+# CHUC NANG: Cau hinh Flask: SQLite, SECRET_KEY, so trang, bien moi truong BLINDASSIST_*
+# ===================
+
 import os
 
 SERVER_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/blind_mode.py
+# CHUC NANG: /thiet-bi che do nguoi khiem thi tren trinh duyet
+# ===================
+
 from flask import Blueprint, make_response, render_template, url_for
 from flask_login import login_required
 

@@ -1,3 +1,6 @@
+// === MO TA FILE ===
+// server/app/static/js/statistics.js
+// CHUC NANG: Ve bieu do Chart.js
 (function () {
   "use strict";
 

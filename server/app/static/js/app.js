@@ -1,3 +1,6 @@
+// === MO TA FILE ===
+// server/app/static/js/app.js
+// CHUC NANG: AJAX /api/web/summary 5 giay, thanh SOS + am bao
 (function () {
   "use strict";
 

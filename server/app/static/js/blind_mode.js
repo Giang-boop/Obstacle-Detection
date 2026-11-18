@@ -1,3 +1,6 @@
+// === MO TA FILE ===
+// server/app/static/js/blind_mode.js
+// CHUC NANG: Camera trinh duyet, gui khung JPEG, ve box, Web Speech tieng Viet
 (function () {
   "use strict";
 

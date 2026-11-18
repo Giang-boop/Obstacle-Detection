@@ -1,3 +1,4 @@
+# server/requirements.txt -- CHUC NANG: Thu vien may chu: Flask, SQLAlchemy, Login, WTF, cryptography, ultralytics...
 Flask>=3.0,<3.2
 Flask-SQLAlchemy>=3.1
 Flask-Login>=0.6.3

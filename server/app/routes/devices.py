@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/routes/devices.py
+# CHUC NANG: /devices danh sach thiet bi + cau hinh canh bao tu xa
+# ===================
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 

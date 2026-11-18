@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/app/models.py
+# CHUC NANG: 11 bang CSDL: User, BlindPerson, Guardianship, Device, DeviceConfig, ObjectClass, ModelVersion, UsageSession, Alert, SosEvent, ActivityLog
+# ===================
+
 import secrets
 from datetime import datetime, timedelta
 

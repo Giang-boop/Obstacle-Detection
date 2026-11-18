@@ -1,3 +1,8 @@
+# === MO TA FILE ===
+# server/seed.py
+# CHUC NANG: Lenh py -m server.seed khoi tao lai CSDL
+# ===================
+
 import sys
 
 from server.app import create_app
