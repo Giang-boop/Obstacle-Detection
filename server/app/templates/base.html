@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}BlindAssist{% endblock %} · BlindAssist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="app-body">
+{% set endpoint = request.endpoint or '' %}
+{% macro nav_item(target, icon, label, badge_id=None) %}
+  {% set active = endpoint.split('.')[0] == target.split('.')[0] %}
+  <a class="nav-link{% if active %} active{% endif %}" href="{{ url_for(target) }}">
+    <i class="bi {{ icon }}"></i><span>{{ label }}</span>
+    {% if badge_id %}<span class="badge rounded-pill text-bg-danger ms-auto d-none" id="{{ badge_id }}">0</span>{% endif %}
+  </a>
+{% endmacro %}
+<div class="app-shell">
+  <aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
+    <div class="sidebar-inner">
+    <div class="sidebar-brand">
+      <span class="brand-mark"><i class="bi bi-eye"></i></span>
+      <div>
+        <div class="brand-name">BlindAssist</div>
+        <div class="brand-sub">Hỗ trợ người khiếm thị</div>
+      </div>
+      <button type="button" class="btn-close btn-close-white d-lg-none ms-auto" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Đóng"></button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Theo dõi</div>
+      {{ nav_item('dashboard.index', 'bi-speedometer2', 'Bảng điều khiển') }}
+      {{ nav_item('blind_persons.list_blind_persons', 'bi-person-heart', 'Người khiếm thị') }}
+      {{ nav_item('alerts.list_alerts', 'bi-exclamation-triangle', 'Lịch sử cảnh báo') }}
+      {{ nav_item('statistics.index', 'bi-bar-chart-line', 'Thống kê') }}
+      {{ nav_item('sos.list_sos', 'bi-broadcast', 'Tín hiệu SOS', 'nav-sos-badge') }}
+      {{ nav_item('devices.list_devices', 'bi-cpu', 'Thiết bị') }}
+      {{ nav_item('sessions.list_sessions', 'bi-clock-history', 'Phiên sử dụng') }}
+      {% if current_user.is_admin %}
+      <div class="nav-section">Quản trị</div>
+      {% for target, icon, label in [
+        ('admin.users', 'bi-people', 'Tài khoản'),
+        ('admin.blind_persons', 'bi-person-vcard', 'Người khiếm thị & phân công'),
+        ('admin.devices', 'bi-hdd-network', 'Quản lý thiết bị'),
+        ('admin.classes', 'bi-tags', 'Lớp vật cản'),
+        ('admin.models', 'bi-diagram-3', 'Phiên bản model'),
+        ('admin.logs', 'bi-journal-text', 'Nhật ký hệ thống')] %}
+        {% set group = target.split('.')[1] %}
+        {% set active = endpoint == target or endpoint.startswith('admin.') and (
+            (group == 'users' and endpoint.endswith('_user')) or
+            (group == 'blind_persons' and endpoint.endswith('_blind_person')) or
+            (group == 'devices' and endpoint.endswith('_device')) or
+            (group == 'models' and endpoint.endswith('_model'))) %}
+        <a class="nav-link{% if active %} active{% endif %}" href="{{ url_for(target) }}"><i class="bi {{ icon }}"></i><span>{{ label }}</span></a>
+      {% endfor %}
+      {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+      <div class="small text-white-50">Máy chủ BlindAssist · Nhóm 11</div>
+    </div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button class="btn btn-outline-secondary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-label="Mở menu">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="topbar-title">{% block heading %}{% endblock %}</div>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="live-indicator d-none d-md-inline-flex" title="Tự cập nhật mỗi {{ SUMMARY_POLL_SECONDS }} giây">
+          <span class="live-dot"></span><span id="live-online">–</span>&nbsp;thiết bị trực tuyến
+        </span>
+        <div class="dropdown">
+          <button class="btn btn-light border dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" type="button">
+            <span class="avatar">{{ current_user.full_name[:1] }}</span>
+            <span class="d-none d-sm-inline text-start lh-sm">
+              <span class="d-block fw-semibold small">{{ current_user.full_name }}</span>
+              <span class="d-block text-secondary" style="font-size:.75rem">{{ current_user.role_label }}</span>
+            </span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="bi bi-person-gear me-2"></i>Hồ sơ cá nhân</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{{ url_for('auth.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div id="sos-banner" class="sos-banner d-none" role="alert" aria-live="assertive">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <i class="bi bi-exclamation-octagon-fill fs-3"></i>
+        <div class="flex-grow-1">
+          <div class="fw-bold" id="sos-banner-title">Có tín hiệu SOS chưa xử lý</div>
+          <div class="small" id="sos-banner-detail"></div>
+        </div>
+        <a href="{{ url_for('sos.list_sos') }}" class="btn btn-light btn-sm fw-semibold">Xem và xử lý</a>
+        <button type="button" class="btn btn-outline-light btn-sm" id="sos-mute-button"><i class="bi bi-volume-mute"></i> Tắt âm báo</button>
+      </div>
+    </div>
+
+    <main class="app-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'info' if category == 'message' else category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script>
+  window.BLINDASSIST = {
+    summaryUrl: "{{ url_for('web_api.summary') }}",
+    pollSeconds: {{ SUMMARY_POLL_SECONDS }}
+  };
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

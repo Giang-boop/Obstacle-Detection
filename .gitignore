@@ -1,32 +1,27 @@
-# Python cache
+﻿# Python
 __pycache__/
-*.py[cod]
-
-# Virtual environment
-venv/
+*.pyc
+*.cache
 .venv/
-env/
-
-# IDE
-.vscode/
-.idea/
-
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Training results
+venv/
+~$*
+logs/
+server/instance/
+*.db
+*.pt
+!detector/best.pt
+*.mp4
+*.avi
+mlflow/
 runs/
-wandb/
-
-# Dataset
-datasets/
-data/
-train/
-valid/
-test/
-
-# Log files
-*.log
-
-# Temporary files
-*.tmp
+training/runs/
+training/datasets/
+training/train_log.txt
+tests/e2e_artifacts/
+test-results/
+playwright-report/
+tests/
+docs/
+server/README_SERVER.txt
+training/ket_qua_danh_gia/
+training/*.txt

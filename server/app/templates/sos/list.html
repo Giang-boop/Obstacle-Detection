@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, empty_state, pagination_nav, sos_status with context %}
+{% block title %}Tín hiệu SOS{% endblock %}
+{% block heading %}Tín hiệu SOS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Tín hiệu SOS</h1>
+    <div class="subtitle">Người khiếm thị bấm phím S trên thiết bị để gửi tín hiệu cầu cứu.</div>
+  </div>
+  <div class="btn-group" role="group" aria-label="Lọc trạng thái">
+    <a class="btn btn-outline-primary{% if not status %} active{% endif %}" href="{{ url_for('sos.list_sos') }}">Tất cả</a>
+    <a class="btn btn-outline-primary{% if status == 'new' %} active{% endif %}" href="{{ url_for('sos.list_sos', status='new') }}">Chưa xử lý</a>
+    <a class="btn btn-outline-primary{% if status == 'handled' %} active{% endif %}" href="{{ url_for('sos.list_sos', status='handled') }}">Đã xử lý</a>
+  </div>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Mã</th><th>Thời gian</th><th>Người khiếm thị</th><th>Thiết bị</th><th>Trạng thái</th><th style="min-width:320px">Xử lý</th></tr></thead>
+      <tbody>
+      {% for sos_event in pagination.items %}
+        <tr class="{% if sos_event.status == 'new' %}table-danger{% endif %}">
+          <td class="fw-semibold">#{{ sos_event.id }}</td>
+          <td class="text-nowrap">{{ sos_event.created_at | dt }}</td>
+          <td>{{ sos_event.device.blind_person.full_name if sos_event.device.blind_person else '—' }}</td>
+          <td>{{ sos_event.device.name }}<div class="small text-secondary">{{ sos_event.device.device_code }}</div></td>
+          <td>{{ sos_status(sos_event) }}</td>
+          <td>
+            {% if sos_event.status == 'new' %}
+            <form method="post" action="{{ url_for('sos.handle', sos_id=sos_event.id) }}" class="d-flex gap-2">
+              {{ csrf_field() }}
+              <input class="form-control form-control-sm" name="note" placeholder="Ví dụ: Đã gọi điện, đang đến đón" aria-label="Ghi chú xử lý">
+              <button class="btn btn-sm btn-danger text-nowrap" type="submit"><i class="bi bi-check2-circle"></i> Đã xử lý</button>
+            </form>
+            {% else %}
+            <div class="small"><span class="fw-semibold">{{ sos_event.handler.full_name if sos_event.handler else '—' }}</span> lúc {{ sos_event.handled_at | dt }}</div>
+            {% if sos_event.note %}<div class="small text-secondary">{{ sos_event.note }}</div>{% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'sos.list_sos', {'status': status} if status else {}) }}
+  {% else %}
+    {{ empty_state('bi-shield-check', 'Chưa có tín hiệu SOS nào.') }}
+  {% endif %}
+</div>
+{% endblock %}

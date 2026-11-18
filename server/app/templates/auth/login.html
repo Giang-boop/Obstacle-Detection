@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đăng nhập · BlindAssist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="app-body">
+<div class="login-page">
+  <section class="login-aside">
+    <div class="d-flex align-items-center gap-3">
+      <span class="brand-mark"><i class="bi bi-eye"></i></span>
+      <div>
+        <div class="brand-name">BlindAssist</div>
+        <div class="brand-sub">Hệ thống hỗ trợ người khiếm thị</div>
+      </div>
+    </div>
+    <div>
+      <h2 class="mb-4">Nhận diện vật cản và cảnh báo bằng giọng nói, theo dõi từ xa cho người thân.</h2>
+      <div class="login-feature"><i class="bi bi-cpu"></i><div><div class="fw-semibold text-white">Thiết bị nhận diện YOLO</div><div class="small">Phát hiện vật cản, ước lượng khoảng cách và đọc cảnh báo.</div></div></div>
+      <div class="login-feature"><i class="bi bi-broadcast"></i><div><div class="fw-semibold text-white">Tín hiệu SOS tức thời</div><div class="small">Người thân nhận thông báo và âm báo ngay trên trình duyệt.</div></div></div>
+      <div class="login-feature"><i class="bi bi-sliders"></i><div><div class="fw-semibold text-white">Cấu hình cảnh báo từ xa</div><div class="small">Chỉnh ngưỡng khoảng cách, tốc độ đọc và lớp vật cản.</div></div></div>
+    </div>
+    <div class="small text-white-50">Đồ án tốt nghiệp · Nhóm 11</div>
+  </section>
+  <section class="login-form-wrap">
+    <div class="login-card">
+      <div class="d-lg-none d-flex align-items-center gap-2 mb-4">
+        <span class="brand-mark"><i class="bi bi-eye"></i></span>
+        <span class="fs-5 fw-bold">BlindAssist</span>
+      </div>
+      <h1 class="h3 fw-bold mb-1">Đăng nhập</h1>
+      <p class="text-secondary mb-4">Dành cho người thân và quản trị viên.</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'info' if category == 'message' else category }} py-2">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="username">Tên đăng nhập</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+            <input class="form-control form-control-lg" id="username" name="username" value="{{ username }}" placeholder="Ví dụ: admin hoặc nguoithan" autocomplete="username" required autofocus>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="password">Mật khẩu</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+            <input class="form-control form-control-lg" id="password" name="password" type="password" placeholder="Nhập mật khẩu của tài khoản" autocomplete="current-password" required>
+          </div>
+        </div>
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="remember" name="remember">
+          <label class="form-check-label" for="remember">Ghi nhớ đăng nhập</label>
+        </div>
+        <button class="btn btn-primary btn-lg w-100" type="submit"><i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập</button>
+      </form>
+      <div class="blind-mode-entry mt-4 pt-4 border-top">
+        <a class="btn btn-dark btn-lg w-100" href="{{ url_for('blind_mode.index') }}" id="blind-mode-link"><i class="bi bi-eye-fill me-2"></i>Tôi là người khiếm thị – Mở chế độ thiết bị</a>
+        <div class="small text-secondary mt-2 text-center">Dùng camera điện thoại hoặc máy tính, cảnh báo vật cản bằng giọng nói.</div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

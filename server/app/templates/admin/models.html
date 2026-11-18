@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, empty_state, pagination_nav with context %}
+{% block title %}Phiên bản model{% endblock %}
+{% block heading %}Phiên bản model{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Phiên bản model</h1>
+    <div class="subtitle">Ghi nhận các model YOLO đã huấn luyện cùng chỉ số đánh giá, chọn model đang dùng.</div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_model') }}"><i class="bi bi-plus-lg me-1"></i>Thêm phiên bản</a>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th style="min-width:240px">Phiên bản</th><th>Thông số</th><th class="text-end">Precision</th><th class="text-end">Recall</th><th class="text-end">mAP@0.5</th><th class="text-end">mAP@0.5:0.95</th><th>Trạng thái</th><th class="text-end">Thao tác</th></tr></thead>
+      <tbody>
+      {% for model_version in pagination.items %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ model_version.name }}</div>
+            <div class="small"><code>{{ model_version.file_name }}</code></div>
+            {% if model_version.note %}<div class="small text-secondary">{{ model_version.note }}</div>{% endif %}
+          </td>
+          <td class="small text-nowrap">
+            <div>{{ model_version.architecture or '—' }}</div>
+            <div class="text-secondary">{{ model_version.num_classes or '—' }} lớp · {{ model_version.epochs or '—' }} epoch · ảnh {{ model_version.img_size or '—' }}</div>
+            <div class="text-secondary">Huấn luyện: {{ model_version.trained_at | dt('%d/%m/%Y') }}</div>
+          </td>
+          <td class="text-end">{{ model_version.precision | num(3) }}</td>
+          <td class="text-end">{{ model_version.recall | num(3) }}</td>
+          <td class="text-end">{{ model_version.map50 | num(3) }}</td>
+          <td class="text-end">{{ model_version.map50_95 | num(3) }}</td>
+          <td>{% if model_version.is_active %}<span class="status-pill status-online">Đang dùng</span>{% else %}<span class="status-pill status-offline">Lưu trữ</span>{% endif %}</td>
+          <td class="text-end">
+            <div class="d-flex flex-wrap justify-content-end gap-1">
+            <a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ url_for('admin.edit_model', model_id=model_version.id) }}"><i class="bi bi-pencil"></i> Sửa</a>
+            {% if not model_version.is_active %}
+            <form class="d-inline" method="post" action="{{ url_for('admin.activate_model', model_id=model_version.id) }}">
+              {{ csrf_field() }}
+              <button class="btn btn-sm btn-outline-success text-nowrap" type="submit"><i class="bi bi-check2-circle"></i> Dùng</button>
+            </form>
+            <form class="d-inline" method="post" action="{{ url_for('admin.delete_model', model_id=model_version.id) }}" data-confirm="Xóa phiên bản {{ model_version.name }}?">
+              {{ csrf_field() }}
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+            </form>
+            {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'admin.models') }}
+  {% else %}
+    {{ empty_state('bi-diagram-3', 'Chưa có phiên bản model nào.') }}
+  {% endif %}
+</div>
+{% endblock %}

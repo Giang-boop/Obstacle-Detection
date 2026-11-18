@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state with context %}
+{% block title %}Thống kê{% endblock %}
+{% block heading %}Thống kê{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Thống kê cảnh báo</h1>
+    <div class="subtitle">Phân tích cảnh báo vật cản theo thời gian, loại vật, mức độ và vị trí.</div>
+  </div>
+  <form method="get" class="d-flex gap-2">
+    <select class="form-select" name="blind_person_id" aria-label="Người khiếm thị" onchange="this.form.submit()">
+      <option value="">Tất cả người khiếm thị</option>
+      {% for person in blind_persons %}
+      <option value="{{ person.id }}" {% if selected_blind_person_id == person.id %}selected{% endif %}>{{ person.full_name }}</option>
+      {% endfor %}
+    </select>
+    <noscript><button class="btn btn-primary" type="submit">Xem</button></noscript>
+  </form>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3"><div class="card stat-card"><span class="stat-icon blue"><i class="bi bi-collection"></i></span><div><div class="stat-value">{{ stats.total_alerts }}</div><div class="stat-label">Tổng số cảnh báo</div></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card stat-card"><span class="stat-icon red"><i class="bi bi-exclamation-octagon"></i></span><div><div class="stat-value">{{ stats.danger_alerts }}</div><div class="stat-label">Mức nguy hiểm</div></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card stat-card"><span class="stat-icon amber"><i class="bi bi-exclamation-triangle"></i></span><div><div class="stat-value">{{ stats.warning_alerts }}</div><div class="stat-label">Mức cảnh báo</div></div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card stat-card"><span class="stat-icon green"><i class="bi bi-speedometer"></i></span><div><div class="stat-value">{{ stats.avg_fps | num(1) }}</div><div class="stat-label">FPS trung bình · {{ stats.session_count }} phiên</div></div></div></div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-graph-up"></i>Số cảnh báo theo ngày ({{ days_in_chart }} ngày gần nhất)</div>
+  <div class="card-body"><div class="chart-box"><canvas id="chart-per-day" aria-label="Biểu đồ cảnh báo theo ngày"></canvas></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-tags"></i>Theo loại vật cản</div>
+      <div class="card-body">
+        {% if stats.class_rows %}<div class="chart-box"><canvas id="chart-by-class"></canvas></div>
+        {% else %}{{ empty_state('bi-bar-chart', 'Chưa có dữ liệu cảnh báo.') }}{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-exclamation-diamond"></i>Theo mức</div>
+      <div class="card-body">
+        {% if stats.total_alerts %}<div class="chart-box"><canvas id="chart-by-level"></canvas></div>
+        {% else %}{{ empty_state('bi-pie-chart', 'Chưa có dữ liệu.') }}{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-xl-3">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-arrows-move"></i>Theo vị trí</div>
+      <div class="card-body">
+        {% if stats.total_alerts %}<div class="chart-box"><canvas id="chart-by-position"></canvas></div>
+        {% else %}{{ empty_state('bi-pie-chart', 'Chưa có dữ liệu.') }}{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chartjs/chart.umd.min.js') }}"></script>
+<script id="chart-data" type="application/json">{{ stats.chart | tojson }}</script>
+<script src="{{ url_for('static', filename='js/statistics.js') }}"></script>
+{% endblock %}

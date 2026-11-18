@@ -1,0 +1,89 @@
+{% macro csrf_field() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro level_badge(level) %}
+  <span class="badge {{ LEVEL_BADGES.get(level, 'text-bg-secondary') }}">{{ level | level_label }}</span>
+{% endmacro %}
+
+{% macro device_status(device) %}
+  {% set status = device.effective_status %}
+  <span class="status-pill status-{{ status }}" data-device-status="{{ device.id }}">{{ STATUS_LABELS[status] }}</span>
+{% endmacro %}
+
+{% macro sos_status(sos_event) %}
+  <span class="status-pill status-{{ sos_event.status }}">{{ SOS_STATUS_LABELS.get(sos_event.status, sos_event.status) }}</span>
+{% endmacro %}
+
+{% macro empty_state(icon, message) %}
+  <div class="empty-state"><i class="bi {{ icon }}"></i>{{ message }}</div>
+{% endmacro %}
+
+{% macro pagination_nav(pagination, endpoint, args={}) %}
+  {% if pagination.total %}
+  {% set first_index = (pagination.page - 1) * pagination.per_page + 1 %}
+  {% set last_index = first_index + (pagination.items | length) - 1 %}
+  <nav aria-label="Phân trang" class="pagination-bar d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 py-2 border-top">
+    <span class="small text-secondary" data-pagination-summary>Hiển thị {{ first_index }}–{{ last_index }} trên tổng {{ pagination.total }} bản ghi{% if pagination.pages > 1 %} · Trang {{ pagination.page }}/{{ pagination.pages }}{% endif %}</span>
+    {% if pagination.pages > 1 %}
+    <ul class="pagination pagination-sm">
+      <li class="page-item{% if not pagination.has_prev %} disabled{% endif %}">
+        <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num or 1, **args) }}" aria-label="Trang trước">Trước</a>
+      </li>
+      {% for page_number in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if page_number %}
+          <li class="page-item{% if page_number == pagination.page %} active{% endif %}">
+            <a class="page-link" href="{{ url_for(endpoint, page=page_number, **args) }}"{% if page_number == pagination.page %} aria-current="page"{% endif %}>{{ page_number }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+      <li class="page-item{% if not pagination.has_next %} disabled{% endif %}">
+        <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num or pagination.pages, **args) }}" aria-label="Trang sau">Sau</a>
+      </li>
+    </ul>
+    {% endif %}
+  </nav>
+  {% endif %}
+{% endmacro %}
+
+{% macro search_box(name, value, placeholder, label) %}
+  <div class="input-group">
+    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+    <input class="form-control" type="search" id="{{ name }}" name="{{ name }}" value="{{ value or '' }}" placeholder="{{ placeholder }}" aria-label="{{ label }}">
+  </div>
+{% endmacro %}
+
+{% macro alerts_table(alerts, show_person=True) %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Thời gian</th>
+          {% if show_person %}<th>Người khiếm thị</th>{% endif %}
+          <th>Vật cản</th>
+          <th>Mức</th>
+          <th class="text-end">Khoảng cách</th>
+          <th>Vị trí</th>
+          <th class="text-end">TTC</th>
+          <th>Nội dung đọc</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for alert in alerts %}
+        <tr>
+          <td class="text-nowrap">{{ alert.created_at | dt }}</td>
+          {% if show_person %}
+          <td>{{ alert.device.blind_person.full_name if alert.device.blind_person else '—' }}<div class="small text-secondary">{{ alert.device.device_code }}</div></td>
+          {% endif %}
+          <td><span class="fw-semibold first-cap">{{ alert.class_name_vi or alert.class_code }}</span><div class="small text-secondary">{{ alert.class_code }}</div></td>
+          <td>{{ level_badge(alert.level) }}</td>
+          <td class="text-end text-nowrap">{{ alert.distance_m | num(1) }} m</td>
+          <td>{{ alert.position | position_label }}</td>
+          <td class="text-end text-nowrap">{% if alert.ttc_s is not none %}{{ alert.ttc_s | num(1) }} s{% else %}—{% endif %}</td>
+          <td class="small">{{ alert.message or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}

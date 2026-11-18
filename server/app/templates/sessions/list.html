@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import empty_state, pagination_nav with context %}
+{% block title %}Phiên sử dụng{% endblock %}
+{% block heading %}Phiên sử dụng{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Phiên sử dụng</h1>
+    <div class="subtitle">Mỗi lần thiết bị chạy nhận diện là một phiên: thời gian, FPS trung bình, độ trễ và số cảnh báo.</div>
+  </div>
+  <form method="get">
+    <select class="form-select" name="blind_person_id" aria-label="Người khiếm thị" onchange="this.form.submit()">
+      <option value="">Tất cả người khiếm thị</option>
+      {% for person in blind_persons %}
+      <option value="{{ person.id }}" {% if selected_blind_person_id == person.id %}selected{% endif %}>{{ person.full_name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Mã</th><th>Người khiếm thị</th><th>Bắt đầu</th><th>Kết thúc</th><th>Thời lượng</th><th>Model</th><th class="text-end">Khung hình</th><th class="text-end">FPS TB</th><th class="text-end">Độ trễ TB</th><th class="text-end">Cảnh báo</th></tr></thead>
+      <tbody>
+      {% for usage_session in pagination.items %}
+        <tr>
+          <td class="fw-semibold">#{{ usage_session.id }}</td>
+          <td>{{ usage_session.device.blind_person.full_name if usage_session.device.blind_person else '—' }}<div class="small text-secondary">{{ usage_session.device.device_code }}</div></td>
+          <td class="text-nowrap">{{ usage_session.started_at | dt }}</td>
+          <td class="text-nowrap">{% if usage_session.ended_at %}{{ usage_session.ended_at | dt }}{% else %}<span class="status-pill status-online">Đang chạy</span>{% endif %}</td>
+          <td class="text-nowrap">{{ usage_session.duration_seconds | duration }}</td>
+          <td class="small">{{ usage_session.model_name or '—' }}</td>
+          <td class="text-end">{{ usage_session.frames if usage_session.frames is not none else '—' }}</td>
+          <td class="text-end">{{ usage_session.avg_fps | num(1) }}</td>
+          <td class="text-end text-nowrap">{% if usage_session.avg_latency_ms is not none %}{{ usage_session.avg_latency_ms | num(0) }} ms{% else %}—{% endif %}</td>
+          <td class="text-end">{{ usage_session.alert_count if usage_session.alert_count is not none else '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'sessions.list_sessions', {'blind_person_id': selected_blind_person_id} if selected_blind_person_id else {}) }}
+  {% else %}
+    {{ empty_state('bi-clock', 'Chưa có phiên sử dụng nào. Phiên được tạo khi app detector kết nối máy chủ.') }}
+  {% endif %}
+</div>
+{% endblock %}

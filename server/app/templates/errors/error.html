@@ -1,0 +1,14 @@
+{% if current_user.is_authenticated %}{% set layout = "base.html" %}{% else %}{% set layout = "errors/standalone.html" %}{% endif %}
+{% extends layout %}
+{% block title %}{{ title }}{% endblock %}
+{% block heading %}Lỗi {{ code }}{% endblock %}
+{% block content %}
+<div class="card mx-auto" style="max-width: 560px">
+  <div class="card-body text-center p-5">
+    <div class="display-5 fw-bold text-secondary mb-2">{{ code }}</div>
+    <h1 class="h4 mb-3">{{ title }}</h1>
+    <p class="text-secondary mb-4">{{ message }}</p>
+    <a class="btn btn-primary" href="{{ url_for('dashboard.index') }}"><i class="bi bi-house me-1"></i>Về bảng điều khiển</a>
+  </div>
+</div>
+{% endblock %}

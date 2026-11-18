@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, empty_state, pagination_nav, search_box with context %}
+{% block title %}Quản lý tài khoản{% endblock %}
+{% block heading %}Quản lý tài khoản{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Tài khoản</h1>
+    <div class="subtitle">Tài khoản quản trị viên và người thân đăng nhập web.</div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_user') }}"><i class="bi bi-person-plus me-1"></i>Thêm tài khoản</a>
+</div>
+<div class="card filter-card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-7 col-xl-6">
+        <label class="form-label" for="q">Tìm kiếm</label>
+        {{ search_box('q', keyword, 'Tên đăng nhập, họ tên, email hoặc SĐT', 'Tìm tài khoản') }}
+      </div>
+      <div class="col-sm-6 col-md-3 col-xl-3">
+        <label class="form-label" for="role">Vai trò</label>
+        <select class="form-select" id="role" name="role">
+          <option value="">-- Tất cả vai trò --</option>
+          <option value="admin" {% if role == 'admin' %}selected{% endif %}>Quản trị viên</option>
+          <option value="guardian" {% if role == 'guardian' %}selected{% endif %}>Người thân</option>
+        </select>
+      </div>
+      <div class="col-sm-6 col-md-2 col-xl-3 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.users') }}" title="Xóa bộ lọc"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Tên đăng nhập</th><th>Họ tên</th><th>Vai trò</th><th>Liên hệ</th><th>Giám hộ</th><th>Trạng thái</th><th>Đăng nhập gần nhất</th><th class="text-end">Thao tác</th></tr></thead>
+      <tbody>
+      {% for user in pagination.items %}
+        <tr>
+          <td class="fw-semibold">{{ user.username }}</td>
+          <td>{{ user.full_name }}</td>
+          <td><span class="badge {{ 'text-bg-primary' if user.is_admin else 'text-bg-light border' }}">{{ user.role_label }}</span></td>
+          <td class="small">{{ user.email or '' }}<div class="text-secondary">{{ user.phone or '' }}</div></td>
+          <td class="small">
+            {% for guardianship in user.guardianships %}<div>{{ guardianship.blind_person.full_name }}</div>{% else %}<span class="text-secondary">—</span>{% endfor %}
+          </td>
+          <td>{% if user.is_active %}<span class="status-pill status-online">Hoạt động</span>{% else %}<span class="status-pill status-locked">Đã khóa</span>{% endif %}</td>
+          <td class="small text-nowrap">{{ user.last_login_at | dt }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_user', user_id=user.id) }}"><i class="bi bi-pencil"></i> Sửa</a>
+            {% if user.id != current_user.id %}
+            <form class="d-inline" method="post" action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}" data-confirm="{{ 'Mở khóa' if not user.is_active else 'Khóa' }} tài khoản {{ user.username }}?">
+              {{ csrf_field() }}
+              {% if user.is_active %}
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-lock"></i> Khóa</button>
+              {% else %}
+              <button class="btn btn-sm btn-outline-success" type="submit"><i class="bi bi-unlock"></i> Mở khóa</button>
+              {% endif %}
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'admin.users', filter_args) }}
+  {% else %}
+    {{ empty_state('bi-person-x', 'Không có tài khoản nào khớp bộ lọc.') }}
+  {% endif %}
+</div>
+{% endblock %}

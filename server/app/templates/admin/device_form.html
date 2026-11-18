@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, device_status with context %}
+{% block title %}{{ 'Sửa thiết bị' if device else 'Thêm thiết bị' }}{% endblock %}
+{% block heading %}Quản lý thiết bị{% endblock %}
+{% block content %}
+{% set values = form_values if form_values else (device or {}) %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('admin.devices') }}">Quản lý thiết bị</a></li>
+      <li class="breadcrumb-item active">{{ device.device_code if device else 'Thêm mới' }}</li>
+    </ol></nav>
+    <h1 class="d-flex align-items-center gap-2">{{ device.device_code ~ ' – ' ~ device.name if device else 'Thêm thiết bị' }} {% if device %}{{ device_status(device) }}{% endif %}</h1>
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-hdd-network"></i>Thông tin thiết bị</div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {{ csrf_field() }}
+          <div class="mb-3">
+            <label class="form-label" for="name">Tên thiết bị</label>
+            <input class="form-control" id="name" name="name" value="{{ values.name or '' }}" placeholder="Ví dụ: Laptop camera phòng khách" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="blind_person_id">Gán cho người khiếm thị</label>
+            <select class="form-select" id="blind_person_id" name="blind_person_id">
+              <option value="">-- Chưa gán người khiếm thị --</option>
+              {% for person in blind_persons %}
+              <option value="{{ person.id }}" {% if values.blind_person_id == person.id %}selected{% endif %}>{{ person.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% if not device %}<div class="form-text mb-3">Mã DEV-xxxx và mã thiết bị (api_key) 32 ký tự được cấp tự động khi lưu.</div>{% endif %}
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Lưu</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.devices') }}">Quay lại</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% if device %}
+  <div class="col-lg-6">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-key"></i>Mã thiết bị (api_key)</div>
+      <div class="card-body">
+        <p class="small text-secondary mb-2">Nhập mã này vào app detector (<code>DEVICE_KEY</code> trong config.py hoặc tham số <code>--device-key</code>).</p>
+        <div class="key-text d-block p-2 mb-3" id="device-api-key">{{ device.api_key }}</div>
+        <form method="post" action="{{ url_for('admin.regenerate_device_key', device_id=device.id) }}" data-confirm="Cấp lại mã cho {{ device.device_code }}? App đang dùng mã cũ sẽ bị từ chối (401).">
+          {{ csrf_field() }}
+          <button class="btn btn-outline-danger" type="submit"><i class="bi bi-arrow-repeat me-1"></i>Cấp lại mã thiết bị</button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="bi bi-info-circle"></i>Kết nối</div>
+      <div class="card-body">
+        <dl class="info-list mb-0 row">
+          <dt class="col-5">Lần cuối kết nối</dt><dd class="col-7">{{ device.last_seen_at | dt }}</dd>
+          <dt class="col-5">Phiên bản app</dt><dd class="col-7">{{ device.app_version or '—' }}</dd>
+          <dt class="col-5">Model</dt><dd class="col-7">{{ device.model_name or '—' }}</dd>
+          <dt class="col-5">Ngày tạo</dt><dd class="col-7 mb-0">{{ device.created_at | dt }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

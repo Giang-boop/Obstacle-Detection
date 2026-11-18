@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import alerts_table, empty_state, pagination_nav with context %}
+{% block title %}Lịch sử cảnh báo{% endblock %}
+{% block heading %}Lịch sử cảnh báo{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Lịch sử cảnh báo</h1>
+    <div class="subtitle">Cảnh báo vật cản do thiết bị gửi về máy chủ.</div>
+  </div>
+  <a class="btn btn-success" href="{{ url_for('alerts.export_csv', **filter_args) }}"><i class="bi bi-filetype-csv me-1"></i>Xuất CSV</a>
+</div>
+
+<div class="card filter-card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-6 col-xl-2">
+        <label class="form-label" for="blind_person_id">Người khiếm thị</label>
+        <select class="form-select" id="blind_person_id" name="blind_person_id">
+          <option value="">Tất cả</option>
+          {% for person in blind_persons %}
+          <option value="{{ person.id }}" {% if filters.blind_person_id == person.id %}selected{% endif %}>{{ person.full_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3 col-xl-2">
+        <label class="form-label" for="date_from">Từ ngày</label>
+        <input class="form-control" type="date" id="date_from" name="date_from" value="{{ filters.date_from.isoformat() if filters.date_from else '' }}">
+      </div>
+      <div class="col-6 col-md-3 col-xl-2">
+        <label class="form-label" for="date_to">Đến ngày</label>
+        <input class="form-control" type="date" id="date_to" name="date_to" value="{{ filters.date_to.isoformat() if filters.date_to else '' }}">
+      </div>
+      <div class="col-6 col-md-3 col-xl-2">
+        <label class="form-label" for="level">Mức</label>
+        <select class="form-select" id="level" name="level">
+          <option value="">Tất cả</option>
+          {% for code, label in LEVEL_LABELS.items() %}
+          <option value="{{ code }}" {% if filters.level == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-md-3 col-xl-2">
+        <label class="form-label" for="class_code">Loại vật cản</label>
+        <select class="form-select" id="class_code" name="class_code">
+          <option value="">Tất cả</option>
+          {% for object_class in object_classes %}
+          <option value="{{ object_class.code }}" {% if filters.class_code == object_class.code %}selected{% endif %}>{{ object_class.name_vi | capitalize }} ({{ object_class.code }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6 col-xl-2 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('alerts.list_alerts') }}" title="Xóa bộ lọc"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card table-card">
+  {% if pagination.items %}
+    {{ alerts_table(pagination.items) }}
+    {{ pagination_nav(pagination, 'alerts.list_alerts', filter_args) }}
+  {% else %}
+    {{ empty_state('bi-inbox', 'Không có cảnh báo nào khớp bộ lọc.') }}
+  {% endif %}
+</div>
+{% endblock %}

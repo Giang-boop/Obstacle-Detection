@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="referrer" content="no-referrer">
+  <title>Chế độ người khiếm thị · BlindAssist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/blind_mode.css') }}">
+</head>
+<body class="bm-body">
+<a class="bm-skip" href="#bm-toggle">Đến nút Bắt đầu</a>
+<header class="bm-top">
+  <div class="bm-brand">
+    <i class="bi bi-eye-fill" aria-hidden="true"></i>
+    <div>
+      <div class="bm-brand-name">BlindAssist</div>
+      <div class="bm-brand-sub">Chế độ người khiếm thị</div>
+    </div>
+  </div>
+  <div id="bm-connection" class="bm-pill bm-pill-off" role="status" aria-live="polite">Chưa kết nối</div>
+</header>
+
+<div id="bm-secure-warning" class="bm-banner" role="alert" hidden>
+  Trang đang mở bằng địa chỉ không bảo mật nên trình duyệt chặn camera. Trên điện thoại, hãy chạy máy chủ bằng
+  <code>py -m server.run --https</code> rồi mở <strong>https://&lt;IP máy chủ&gt;:5000/thiet-bi</strong>.
+</div>
+
+<main class="bm-main">
+  <section id="bm-setup" class="bm-setup" aria-labelledby="bm-setup-title" hidden>
+    <h1 id="bm-setup-title">Đăng nhập thiết bị</h1>
+    <p class="bm-lead">Nhập mã thiết bị và khóa thiết bị do người thân hoặc quản trị viên cung cấp. Trình duyệt sẽ ghi nhớ cho các lần sau.</p>
+    <form id="bm-setup-form" novalidate>
+      <label for="bm-device-code">Mã thiết bị</label>
+      <input id="bm-device-code" name="device_code" autocomplete="username" autocapitalize="characters" spellcheck="false" placeholder="Ví dụ: DEV-0001" required>
+      <label for="bm-device-key">Khóa thiết bị (api_key)</label>
+      <input id="bm-device-key" name="api_key" type="password" autocomplete="current-password" spellcheck="false" placeholder="Nhập khóa thiết bị" required>
+      <p id="bm-setup-error" class="bm-error" role="alert" aria-live="assertive"></p>
+      <button class="bm-btn bm-btn-start" type="submit" id="bm-setup-submit"><i class="bi bi-box-arrow-in-right" aria-hidden="true"></i> KẾT NỐI</button>
+    </form>
+    <p class="bm-note">Người thân có thể thiết lập sẵn: đăng nhập web quản lý → Thiết bị → Cấu hình → <strong>Mở chế độ người khiếm thị</strong>.</p>
+    <p class="bm-note"><a href="{{ url_for('auth.login') }}">Về trang đăng nhập web quản lý</a></p>
+  </section>
+
+  <section id="bm-app" class="bm-app" aria-label="Nhận diện vật cản" hidden>
+    <div class="bm-column bm-column-main">
+      <div id="bm-alert" class="bm-alert bm-alert-idle" role="status" aria-live="assertive" aria-atomic="true">Bấm BẮT ĐẦU hoặc phím cách để bật camera.</div>
+      <div class="bm-stage" id="bm-stage">
+        <video id="bm-video" playsinline muted autoplay aria-hidden="true"></video>
+        <canvas id="bm-overlay" aria-hidden="true"></canvas>
+        <div id="bm-stage-empty" class="bm-stage-empty"><i class="bi bi-camera-video-off" aria-hidden="true"></i><span>Camera đang tắt</span></div>
+      </div>
+      <div id="bm-nearest" class="bm-nearest">Chưa có dữ liệu nhận diện.</div>
+    </div>
+    <div class="bm-column bm-column-side">
+      <div class="bm-actions">
+        <button id="bm-toggle" class="bm-btn bm-btn-start" type="button" aria-pressed="false" aria-label="Bắt đầu nhận diện vật cản. Phím tắt: phím cách">
+          <i class="bi bi-play-circle-fill" aria-hidden="true"></i><span id="bm-toggle-text">BẮT ĐẦU</span>
+        </button>
+        <button id="bm-sos" class="bm-btn bm-btn-sos" type="button" aria-label="Gửi tín hiệu cầu cứu SOS cho người thân. Phím tắt: S">
+          <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i><span>SOS</span>
+        </button>
+      </div>
+      <div class="bm-tools">
+        <button id="bm-mute" class="bm-tool" type="button" aria-pressed="false" aria-label="Tắt tiếng đọc cảnh báo. Phím tắt: M">
+          <i class="bi bi-volume-up-fill" aria-hidden="true"></i><span id="bm-mute-text">Tắt tiếng</span>
+        </button>
+        <button id="bm-logout" class="bm-tool" type="button" aria-label="Đổi thiết bị, xóa mã đã ghi nhớ trên trình duyệt">
+          <i class="bi bi-arrow-left-right" aria-hidden="true"></i><span>Đổi thiết bị</span>
+        </button>
+        <div class="bm-camera-select">
+          <label for="bm-camera">Camera</label>
+          <select id="bm-camera" aria-label="Chọn camera">
+            <option value="">Camera sau (mặc định)</option>
+          </select>
+        </div>
+      </div>
+      <dl class="bm-stats">
+        <div><dt>Thiết bị</dt><dd id="bm-device-name">—</dd></div>
+        <div><dt>Người dùng</dt><dd id="bm-person">—</dd></div>
+        <div><dt>Khung/giây</dt><dd id="bm-fps">—</dd></div>
+        <div><dt>Độ trễ</dt><dd id="bm-latency">—</dd></div>
+        <div><dt>Xử lý trên</dt><dd id="bm-engine">—</dd></div>
+        <div><dt>Cảnh báo</dt><dd id="bm-alert-count">0</dd></div>
+      </dl>
+      <p id="bm-voice-note" class="bm-note bm-note-warn" role="note" hidden></p>
+      <p class="bm-help">Phím tắt: <kbd>Phím cách</kbd> bắt đầu/dừng · <kbd>S</kbd> gửi SOS · <kbd>M</kbd> tắt/bật tiếng</p>
+    </div>
+  </section>
+</main>
+
+<script id="bm-options" type="application/json">{{ client_options | tojson }}</script>
+{% if preset %}<script id="bm-preset" type="application/json">{{ preset | tojson }}</script>{% endif %}
+<script src="{{ url_for('static', filename='js/blind_mode.js') }}"></script>
+</body>
+</html>

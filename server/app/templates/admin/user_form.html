@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field with context %}
+{% block title %}{{ 'Sửa tài khoản' if user else 'Thêm tài khoản' }}{% endblock %}
+{% block heading %}Quản lý tài khoản{% endblock %}
+{% block content %}
+{% set values = form_values if form_values else (user or {}) %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('admin.users') }}">Tài khoản</a></li>
+      <li class="breadcrumb-item active">{{ user.username if user else 'Thêm mới' }}</li>
+    </ol></nav>
+    <h1>{{ 'Sửa tài khoản ' ~ user.username if user else 'Thêm tài khoản' }}</h1>
+  </div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-gear"></i>Thông tin tài khoản</div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {{ csrf_field() }}
+          <div class="row g-3">
+            {% if not user %}
+            <div class="col-sm-6">
+              <label class="form-label" for="username">Tên đăng nhập</label>
+              <input class="form-control" id="username" name="username" value="{{ values.username or '' }}" placeholder="Ví dụ: nguyenvana" required>
+              <div class="form-text">3–64 ký tự: chữ không dấu, số, dấu chấm hoặc gạch dưới.</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="password">Mật khẩu ban đầu</label>
+              <input class="form-control" id="password" name="password" type="password" placeholder="Tối thiểu 8 ký tự, gồm chữ và số" required>
+              <div class="form-text">Ít nhất 8 ký tự, gồm chữ và số.</div>
+            </div>
+            {% endif %}
+            <div class="col-sm-6">
+              <label class="form-label" for="full_name">Họ tên</label>
+              <input class="form-control" id="full_name" name="full_name" value="{{ values.full_name or '' }}" placeholder="Ví dụ: Nguyễn Văn A" required>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="role">Vai trò</label>
+              <select class="form-select" id="role" name="role">
+                <option value="guardian" {% if values.role != 'admin' %}selected{% endif %}>Người thân</option>
+                <option value="admin" {% if values.role == 'admin' %}selected{% endif %}>Quản trị viên</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-control" id="email" name="email" type="email" value="{{ values.email or '' }}" placeholder="Ví dụ: nguyenvana@gmail.com">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label" for="phone">Số điện thoại</label>
+              <input class="form-control" id="phone" name="phone" type="tel" value="{{ values.phone or '' }}" placeholder="Ví dụ: 0912 345 678">
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-check2 me-1"></i>Lưu</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.users') }}">Hủy</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% if user %}
+  <div class="col-lg-5">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-key"></i>Đặt lại mật khẩu</div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('admin.reset_user_password', user_id=user.id) }}" autocomplete="off">
+          {{ csrf_field() }}
+          <div class="mb-3">
+            <label class="form-label" for="new_password">Mật khẩu mới</label>
+            <input class="form-control" id="new_password" name="new_password" type="password" placeholder="Tối thiểu 8 ký tự, gồm chữ và số" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="confirm_password">Nhập lại mật khẩu mới</label>
+            <input class="form-control" id="confirm_password" name="confirm_password" type="password" placeholder="Nhập lại đúng mật khẩu mới" required>
+          </div>
+          <button class="btn btn-outline-danger" type="submit"><i class="bi bi-arrow-repeat me-1"></i>Đặt lại mật khẩu</button>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-heart"></i>Đang giám hộ</div>
+      <ul class="list-group list-group-flush">
+        {% for guardianship in user.guardianships %}
+        <li class="list-group-item d-flex justify-content-between"><span>{{ guardianship.blind_person.full_name }}</span><span class="text-secondary small">{{ guardianship.relation or '' }}</span></li>
+        {% else %}
+        <li class="list-group-item text-secondary small">Chưa giám hộ ai. Phân công tại trang Người khiếm thị &amp; phân công.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

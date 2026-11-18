@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "_macros.html" import alerts_table, device_status, empty_state, csrf_field with context %}
+{% block title %}Bảng điều khiển{% endblock %}
+{% block heading %}Bảng điều khiển{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Xin chào, {{ current_user.full_name }}</h1>
+    <div class="subtitle">
+      {% if current_user.is_admin %}Tổng quan toàn hệ thống BlindAssist.{% else %}Theo dõi người khiếm thị bạn đang giám hộ.{% endif %}
+      Số liệu tự cập nhật mỗi {{ SUMMARY_POLL_SECONDS }} giây.
+    </div>
+  </div>
+  <a href="{{ url_for('statistics.index') }}" class="btn btn-outline-primary"><i class="bi bi-bar-chart-line me-1"></i>Xem thống kê</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card">
+      <span class="stat-icon blue"><i class="bi bi-person-heart"></i></span>
+      <div><div class="stat-value">{{ stats.blind_persons }}</div><div class="stat-label">Người khiếm thị</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card">
+      <span class="stat-icon green"><i class="bi bi-wifi"></i></span>
+      <div><div class="stat-value"><span id="stat-devices-online">{{ stats.devices_online }}</span><span class="fs-6 text-secondary fw-normal"> / {{ stats.devices_total }}</span></div><div class="stat-label">Thiết bị trực tuyến</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card">
+      <span class="stat-icon amber"><i class="bi bi-exclamation-triangle"></i></span>
+      <div><div class="stat-value" id="stat-alerts-today">{{ stats.alerts_today }}</div><div class="stat-label">Cảnh báo hôm nay</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card">
+      <span class="stat-icon red"><i class="bi bi-broadcast"></i></span>
+      <div><div class="stat-value" id="stat-sos-new">{{ stats.sos_new }}</div><div class="stat-label">SOS chưa xử lý</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-xl-7">
+    <div class="card table-card h-100">
+      <div class="card-header"><i class="bi bi-cpu"></i>Thiết bị{% if stats.devices_total > devices | length %} ({{ devices | length }}/{{ stats.devices_total }}){% endif %}<a class="ms-auto small fw-normal" href="{{ url_for('devices.list_devices') }}">Xem tất cả</a></div>
+      {% if devices %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Thiết bị</th><th>Người khiếm thị</th><th>Trạng thái</th><th>Lần cuối kết nối</th><th></th></tr></thead>
+          <tbody>
+          {% for device in devices %}
+            <tr>
+              <td><div class="fw-semibold">{{ device.name }}</div><div class="small text-secondary">{{ device.device_code }}{% if device.app_version %} · v{{ device.app_version }}{% endif %}</div></td>
+              <td>{% if device.blind_person %}<a href="{{ url_for('blind_persons.detail', blind_person_id=device.blind_person.id) }}">{{ device.blind_person.full_name }}</a>{% else %}<span class="text-secondary">Chưa gán</span>{% endif %}</td>
+              <td>{{ device_status(device) }}</td>
+              <td class="text-nowrap small" data-device-last-seen="{{ device.id }}">{{ device.last_seen_at | dt }}</td>
+              <td class="text-end"><a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ url_for('devices.edit_config', device_id=device.id) }}"><i class="bi bi-sliders"></i> Cấu hình</a></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        {{ empty_state('bi-cpu', 'Chưa có thiết bị nào.') }}
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card h-100" id="dashboard-sos-panel" data-sos-ids="{{ new_sos_events | map(attribute='id') | join(',') }}">
+      <div class="card-header"><i class="bi bi-broadcast"></i>SOS chưa xử lý<a class="ms-auto small fw-normal" href="{{ url_for('sos.list_sos') }}">Xem tất cả</a></div>
+      {% if new_sos_events %}
+      <ul class="list-group list-group-flush">
+        {% for sos_event in new_sos_events %}
+        <li class="list-group-item py-3">
+          <div class="d-flex align-items-start gap-3">
+            <span class="stat-icon red" style="width:38px;height:38px;font-size:1.1rem"><i class="bi bi-exclamation-octagon"></i></span>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">{{ sos_event.device.blind_person.full_name if sos_event.device.blind_person else sos_event.device.name }}</div>
+              <div class="small text-secondary">{{ sos_event.device.device_code }} · {{ sos_event.created_at | dt }}</div>
+              <form method="post" action="{{ url_for('sos.handle', sos_id=sos_event.id) }}" class="d-flex gap-2 mt-2">
+                {{ csrf_field() }}
+                <input type="hidden" name="return_to" value="{{ url_for('dashboard.index') }}">
+                <input class="form-control form-control-sm" name="note" placeholder="Ví dụ: Đã gọi điện xác nhận an toàn" aria-label="Ghi chú xử lý">
+                <button class="btn btn-sm btn-danger text-nowrap" type="submit"><i class="bi bi-check2-circle"></i> Đã xử lý</button>
+              </form>
+            </div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        {{ empty_state('bi-shield-check', 'Không có tín hiệu SOS nào đang chờ xử lý.') }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="card-header"><i class="bi bi-exclamation-triangle"></i>10 cảnh báo mới nhất<a class="ms-auto small fw-normal" href="{{ url_for('alerts.list_alerts') }}">Xem tất cả</a></div>
+  {% if latest_alerts %}
+    {{ alerts_table(latest_alerts) }}
+  {% else %}
+    {{ empty_state('bi-inbox', 'Chưa có cảnh báo nào. Dữ liệu sẽ xuất hiện khi thiết bị gửi cảnh báo lên máy chủ.') }}
+  {% endif %}
+</div>
+{% endblock %}

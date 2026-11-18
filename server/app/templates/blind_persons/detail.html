@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% from "_macros.html" import alerts_table, device_status, empty_state, sos_status with context %}
+{% block title %}{{ blind_person.full_name }}{% endblock %}
+{% block heading %}Chi tiết người khiếm thị{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+      <li class="breadcrumb-item"><a href="{{ url_for('blind_persons.list_blind_persons') }}">Người khiếm thị</a></li>
+      <li class="breadcrumb-item active">{{ blind_person.full_name }}</li>
+    </ol></nav>
+    <h1>{{ blind_person.full_name }}</h1>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-primary" href="{{ url_for('alerts.list_alerts', blind_person_id=blind_person.id) }}"><i class="bi bi-exclamation-triangle me-1"></i>Lịch sử cảnh báo</a>
+    <a class="btn btn-outline-primary" href="{{ url_for('statistics.index', blind_person_id=blind_person.id) }}"><i class="bi bi-bar-chart-line me-1"></i>Thống kê</a>
+    {% if current_user.is_admin %}
+    <a class="btn btn-primary" href="{{ url_for('admin.edit_blind_person', blind_person_id=blind_person.id) }}"><i class="bi bi-pencil me-1"></i>Sửa</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-person-vcard"></i>Thông tin</div>
+      <div class="card-body">
+        <dl class="info-list mb-0">
+          <dt>Năm sinh</dt><dd>{{ blind_person.birth_year or '—' }}</dd>
+          <dt>Giới tính</dt><dd>{{ blind_person.gender or '—' }}</dd>
+          <dt>Số điện thoại</dt><dd>{{ blind_person.phone or '—' }}</dd>
+          <dt>Địa chỉ</dt><dd>{{ blind_person.address or '—' }}</dd>
+          <dt>Ghi chú</dt><dd class="mb-0">{{ blind_person.note or '—' }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-people"></i>Người thân</div>
+      {% if blind_person.guardianships %}
+      <ul class="list-group list-group-flush">
+        {% for guardianship in blind_person.guardianships %}
+        <li class="list-group-item">
+          <div class="fw-semibold">{{ guardianship.user.full_name }} {% if guardianship.relation %}<span class="badge text-bg-light border">{{ guardianship.relation }}</span>{% endif %}</div>
+          <div class="small text-secondary">{{ guardianship.user.phone or '' }} {{ guardianship.user.email or '' }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}{{ empty_state('bi-people', 'Chưa phân công người thân.') }}{% endif %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-cpu"></i>Thiết bị</div>
+      {% if blind_person.devices %}
+      <ul class="list-group list-group-flush">
+        {% for device in blind_person.devices %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="fw-semibold">{{ device.name }}</div>{{ device_status(device) }}
+          </div>
+          <div class="small text-secondary">{{ device.device_code }} · Lần cuối: <span data-device-last-seen="{{ device.id }}">{{ device.last_seen_at | dt }}</span></div>
+          <div class="small text-secondary">Model: {{ device.model_name or '—' }}</div>
+          <a class="btn btn-sm btn-outline-primary mt-2" href="{{ url_for('devices.edit_config', device_id=device.id) }}"><i class="bi bi-sliders"></i> Cấu hình cảnh báo</a>
+          <a class="btn btn-sm btn-outline-dark mt-2" href="{{ url_for('blind_mode.open_for_device', device_id=device.id) }}" target="_blank" rel="noopener"><i class="bi bi-eye"></i> Mở chế độ người khiếm thị</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}{{ empty_state('bi-cpu', 'Chưa gán thiết bị.') }}{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if recent_sos %}
+<div class="card table-card mb-4">
+  <div class="card-header"><i class="bi bi-broadcast"></i>Tín hiệu SOS gần đây<a class="ms-auto small fw-normal" href="{{ url_for('sos.list_sos') }}">Xem tất cả</a></div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Thời gian</th><th>Thiết bị</th><th>Trạng thái</th><th>Người xử lý</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+      {% for sos_event in recent_sos %}
+        <tr>
+          <td>{{ sos_event.created_at | dt }}</td>
+          <td>{{ sos_event.device.device_code }}</td>
+          <td>{{ sos_status(sos_event) }}</td>
+          <td>{{ sos_event.handler.full_name if sos_event.handler else '—' }}</td>
+          <td class="small">{{ sos_event.note or '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card table-card mb-4">
+  <div class="card-header"><i class="bi bi-exclamation-triangle"></i>Cảnh báo gần đây<a class="ms-auto small fw-normal" href="{{ url_for('alerts.list_alerts', blind_person_id=blind_person.id) }}">Xem tất cả</a></div>
+  {% if recent_alerts %}{{ alerts_table(recent_alerts, show_person=False) }}{% else %}{{ empty_state('bi-inbox', 'Chưa có cảnh báo.') }}{% endif %}
+</div>
+
+<div class="card table-card">
+  <div class="card-header"><i class="bi bi-clock-history"></i>Phiên sử dụng gần đây<a class="ms-auto small fw-normal" href="{{ url_for('sessions.list_sessions', blind_person_id=blind_person.id) }}">Xem tất cả</a></div>
+  {% if recent_sessions %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Bắt đầu</th><th>Kết thúc</th><th>Thời lượng</th><th>Model</th><th class="text-end">FPS TB</th><th class="text-end">Độ trễ TB</th><th class="text-end">Số cảnh báo</th></tr></thead>
+      <tbody>
+      {% for usage_session in recent_sessions %}
+        <tr>
+          <td class="text-nowrap">{{ usage_session.started_at | dt }}</td>
+          <td class="text-nowrap">{% if usage_session.ended_at %}{{ usage_session.ended_at | dt }}{% else %}<span class="status-pill status-online">Đang chạy</span>{% endif %}</td>
+          <td>{{ usage_session.duration_seconds | duration }}</td>
+          <td class="small">{{ usage_session.model_name or '—' }}</td>
+          <td class="text-end">{{ usage_session.avg_fps | num(1) }}</td>
+          <td class="text-end">{% if usage_session.avg_latency_ms is not none %}{{ usage_session.avg_latency_ms | num(0) }} ms{% else %}—{% endif %}</td>
+          <td class="text-end">{{ usage_session.alert_count if usage_session.alert_count is not none else '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}{{ empty_state('bi-clock', 'Chưa có phiên sử dụng.') }}{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, empty_state, pagination_nav, search_box with context %}
+{% block title %}Quản lý người khiếm thị{% endblock %}
+{% block heading %}Quản lý người khiếm thị{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Người khiếm thị &amp; phân công</h1>
+    <div class="subtitle">Thêm, sửa hồ sơ người khiếm thị và phân công người thân giám hộ.</div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_blind_person') }}"><i class="bi bi-plus-lg me-1"></i>Thêm người khiếm thị</a>
+</div>
+<div class="card filter-card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-9 col-xl-8">
+        <label class="form-label" for="q">Tìm kiếm</label>
+        {{ search_box('q', keyword, 'Nhập họ tên, số điện thoại hoặc địa chỉ, ví dụ: Nguyễn Văn An', 'Tìm người khiếm thị') }}
+      </div>
+      <div class="col-md-3 col-xl-4 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit"><i class="bi bi-search me-1"></i>Tìm</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.blind_persons') }}" title="Xóa bộ lọc"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Họ tên</th><th>Năm sinh</th><th>Giới tính</th><th>Điện thoại</th><th>Người thân</th><th>Thiết bị</th><th>Ngày tạo</th><th class="text-end">Thao tác</th></tr></thead>
+      <tbody>
+      {% for person in pagination.items %}
+        <tr>
+          <td class="fw-semibold">{{ person.full_name }}<div class="small text-secondary fw-normal">{{ person.address or '' }}</div></td>
+          <td>{{ person.birth_year or '—' }}</td>
+          <td>{{ person.gender or '—' }}</td>
+          <td>{{ person.phone or '—' }}</td>
+          <td class="small">{% for guardianship in person.guardianships %}<div>{{ guardianship.user.full_name }}{% if guardianship.relation %} <span class="text-secondary">({{ guardianship.relation }})</span>{% endif %}</div>{% else %}<span class="text-secondary">Chưa phân công</span>{% endfor %}</td>
+          <td class="small">{% for device in person.devices %}<div>{{ device.device_code }}</div>{% else %}<span class="text-secondary">—</span>{% endfor %}</td>
+          <td class="small text-nowrap">{{ person.created_at | dt('%d/%m/%Y') }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('blind_persons.detail', blind_person_id=person.id) }}"><i class="bi bi-eye"></i></a>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_blind_person', blind_person_id=person.id) }}"><i class="bi bi-pencil"></i> Sửa</a>
+            <form class="d-inline" method="post" action="{{ url_for('admin.delete_blind_person', blind_person_id=person.id) }}" data-confirm="Xóa {{ person.full_name }}? Thiết bị sẽ chuyển sang chưa gán.">
+              {{ csrf_field() }}
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'admin.blind_persons', filter_args) }}
+  {% else %}
+    {{ empty_state('bi-person-x', 'Không có người khiếm thị nào khớp bộ lọc.' if keyword else 'Chưa có người khiếm thị nào.') }}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import device_status, empty_state, pagination_nav with context %}
+{% block title %}Người khiếm thị{% endblock %}
+{% block heading %}Người khiếm thị{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Người khiếm thị</h1>
+    <div class="subtitle">{% if current_user.is_admin %}Tất cả người khiếm thị trong hệ thống.{% else %}Những người bạn đang giám hộ.{% endif %}</div>
+  </div>
+  {% if current_user.is_admin %}
+  <a class="btn btn-primary" href="{{ url_for('admin.create_blind_person') }}"><i class="bi bi-plus-lg me-1"></i>Thêm người khiếm thị</a>
+  {% endif %}
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Họ tên</th><th>Năm sinh</th><th>Giới tính</th><th>Người thân</th><th>Thiết bị</th><th class="text-end">Tổng cảnh báo</th><th></th></tr></thead>
+      <tbody>
+      {% for person in pagination.items %}
+        <tr>
+          <td><a class="fw-semibold" href="{{ url_for('blind_persons.detail', blind_person_id=person.id) }}">{{ person.full_name }}</a><div class="small text-secondary">{{ person.address or '' }}</div></td>
+          <td>{{ person.birth_year or '—' }}</td>
+          <td>{{ person.gender or '—' }}</td>
+          <td>
+            {% for guardianship in person.guardianships %}
+              <div class="small">{{ guardianship.user.full_name }}{% if guardianship.relation %} <span class="text-secondary">({{ guardianship.relation }})</span>{% endif %}</div>
+            {% else %}<span class="text-secondary small">Chưa phân công</span>{% endfor %}
+          </td>
+          <td>
+            {% for device in person.devices %}
+              <div class="d-flex align-items-center gap-2 small mb-1">{{ device.device_code }} {{ device_status(device) }}</div>
+            {% else %}<span class="text-secondary small">Chưa có thiết bị</span>{% endfor %}
+          </td>
+          <td class="text-end fw-semibold">{{ alert_counts.get(person.id, 0) }}</td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('blind_persons.detail', blind_person_id=person.id) }}">Chi tiết</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'blind_persons.list_blind_persons') }}
+  {% else %}
+    {{ empty_state('bi-person-x', 'Bạn chưa được phân công giám hộ người khiếm thị nào.') }}
+  {% endif %}
+</div>
+{% endblock %}

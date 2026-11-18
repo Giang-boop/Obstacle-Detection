@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import device_status, empty_state, pagination_nav with context %}
+{% block title %}Thiết bị{% endblock %}
+{% block heading %}Thiết bị{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Thiết bị</h1>
+    <div class="subtitle">Thiết bị được coi là ngoại tuyến nếu không kết nối máy chủ quá 30 giây.</div>
+  </div>
+  {% if current_user.is_admin %}
+  <a class="btn btn-primary" href="{{ url_for('admin.devices') }}"><i class="bi bi-hdd-network me-1"></i>Quản lý thiết bị</a>
+  {% endif %}
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Thiết bị</th><th>Người khiếm thị</th><th>Trạng thái</th><th>Lần cuối kết nối</th><th>Phiên bản app</th><th>Model</th><th>Ngưỡng (m)</th><th></th></tr></thead>
+      <tbody>
+      {% for device in pagination.items %}
+        <tr>
+          <td><div class="fw-semibold">{{ device.name }}</div><div class="small text-secondary">{{ device.device_code }}</div></td>
+          <td>{% if device.blind_person %}<a href="{{ url_for('blind_persons.detail', blind_person_id=device.blind_person.id) }}">{{ device.blind_person.full_name }}</a>{% else %}<span class="text-secondary">Chưa gán</span>{% endif %}</td>
+          <td>{{ device_status(device) }}</td>
+          <td class="small text-nowrap" data-device-last-seen="{{ device.id }}">{{ device.last_seen_at | dt }}</td>
+          <td class="small">{{ device.app_version or '—' }}</td>
+          <td class="small">{{ device.model_name or '—' }}</td>
+          <td class="small text-nowrap">{% if device.config %}<span class="text-warning-emphasis">{{ device.config.warning_distance | num(1) }}</span> / <span class="text-danger">{{ device.config.danger_distance | num(1) }}</span>{% else %}—{% endif %}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('devices.edit_config', device_id=device.id) }}"><i class="bi bi-sliders"></i> Cấu hình</a>
+            <a class="btn btn-sm btn-outline-dark" href="{{ url_for('blind_mode.open_for_device', device_id=device.id) }}" target="_blank" rel="noopener" title="Mở chế độ người khiếm thị trên trình duyệt này"><i class="bi bi-eye"></i> Chế độ người khiếm thị</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'devices.list_devices') }}
+  {% else %}
+    {{ empty_state('bi-cpu', 'Chưa có thiết bị nào.') }}
+  {% endif %}
+</div>
+{% endblock %}

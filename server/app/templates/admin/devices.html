@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf_field, device_status, empty_state, pagination_nav, search_box with context %}
+{% block title %}Quản lý thiết bị{% endblock %}
+{% block heading %}Quản lý thiết bị{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Quản lý thiết bị</h1>
+    <div class="subtitle">Cấp mã thiết bị (api_key) cho app detector và gán thiết bị cho người khiếm thị.</div>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_device') }}"><i class="bi bi-plus-lg me-1"></i>Thêm thiết bị</a>
+</div>
+<div class="card filter-card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-9 col-xl-8">
+        <label class="form-label" for="q">Tìm kiếm</label>
+        {{ search_box('q', keyword, 'Nhập mã hoặc tên thiết bị, ví dụ: DEV-0001', 'Tìm thiết bị') }}
+      </div>
+      <div class="col-md-3 col-xl-4 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit"><i class="bi bi-search me-1"></i>Tìm</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('admin.devices') }}" title="Xóa bộ lọc"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card table-card">
+  {% if pagination.items %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Mã</th><th>Tên thiết bị</th><th>Người khiếm thị</th><th>Mã thiết bị (api_key)</th><th>Trạng thái</th><th>Ngày tạo</th><th class="text-end">Thao tác</th></tr></thead>
+      <tbody>
+      {% for device in pagination.items %}
+        <tr>
+          <td class="fw-semibold">{{ device.device_code }}</td>
+          <td>{{ device.name }}</td>
+          <td>{{ device.blind_person.full_name if device.blind_person else '—' }}</td>
+          <td><span class="key-text">{{ device.api_key[:6] }}••••••{{ device.api_key[-4:] }}</span></td>
+          <td>{{ device_status(device) }}</td>
+          <td class="small text-nowrap">{{ device.created_at | dt('%d/%m/%Y') }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.edit_device', device_id=device.id) }}"><i class="bi bi-pencil"></i> Sửa</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('devices.edit_config', device_id=device.id) }}"><i class="bi bi-sliders"></i></a>
+            <form class="d-inline" method="post" action="{{ url_for('admin.delete_device', device_id=device.id) }}" data-confirm="Xóa thiết bị {{ device.device_code }} và toàn bộ cảnh báo, phiên, SOS của thiết bị?">
+              {{ csrf_field() }}
+              <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ pagination_nav(pagination, 'admin.devices', filter_args) }}
+  {% else %}
+    {{ empty_state('bi-cpu', 'Không có thiết bị nào khớp bộ lọc.' if keyword else 'Chưa có thiết bị nào.') }}
+  {% endif %}
+</div>
+{% endblock %}
