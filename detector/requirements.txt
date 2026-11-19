@@ -1,0 +1,11 @@
+# FILE: detector/requirements.txt
+# CHUC NANG: Danh sách thư viện detector: ultralytics, opencv-python, numpy, pyttsx3, comtypes, lapx, requests.
+ultralytics
+opencv-python
+numpy
+pyttsx3
+comtypes
+lapx
+openpyxl
+edge-tts
+requests
